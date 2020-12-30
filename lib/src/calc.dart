@@ -1,7 +1,25 @@
-import 'solarCalc.dart';
-import 'timeCalc.dart' as time_calc;
+// this file contains the final methods to retrieve useful information for the user
 
-dynamic getCalculations(double latitude, double longitude, DateTime dateTime) {
+import 'solar_calc.dart';
+import 'time_calc.dart' as time_calc;
+
+class SunCalc {
+  DateTime sunTransitTime;
+  DateTime sunRiseTime;
+  DateTime sunSetTime;
+  SunCalc({
+    this.sunTransitTime,
+    this.sunRiseTime,
+    this.sunSetTime,
+  });
+
+  @override
+  String toString() =>
+      'SunCalc(sunTransitTime: $sunTransitTime, sunRiseTime: $sunRiseTime, sunSetTime: $sunSetTime)';
+}
+
+//returns sun transit time, sun rise time and sunset time in this order only.
+SunCalc getCalculations(double latitude, double longitude, DateTime dateTime) {
   final dateTime1 =
       DateTime.utc(dateTime.year, dateTime.month, dateTime.day, 0);
   final dateTime0 =
@@ -9,11 +27,10 @@ dynamic getCalculations(double latitude, double longitude, DateTime dateTime) {
   final dateTime2 =
       DateTime.utc(dateTime.year, dateTime.month, dateTime.day + 1, 0);
 
-  final jme1 = time_calc.getJulianEphemerisMillenium(
-      time_calc.getJulianEphemerisCentury(
-          time_calc.gregorianToJulianEphemerisDay(dateTime1)));
+  final jme1 = time_calc.getJulianEphemerisMillenium(time_calc
+      .getJulianEphemerisCentury(time_calc.getJulianEphemerisDay(dateTime1)));
   final nutation1 = getNutation(
-      time_calc.getJulianCentury(time_calc.gregorianToJulianDay(dateTime1)));
+      time_calc.getJulianCentury(time_calc.getJulianDay(dateTime1)));
 
   final geocentricLongitude1 = getGeocentricLongitude(jme1);
   final abCorrection1 = getAberrationCorrection(getEarthRadiusVector(jme1));
@@ -23,11 +40,10 @@ dynamic getCalculations(double latitude, double longitude, DateTime dateTime) {
   final apparentSunLongitude1 =
       getApparentSunLongitude(geocentricLongitude1, nutation1, abCorrection1);
 
-  final jme2 = time_calc.getJulianEphemerisMillenium(
-      time_calc.getJulianEphemerisCentury(
-          time_calc.gregorianToJulianEphemerisDay(dateTime2)));
+  final jme2 = time_calc.getJulianEphemerisMillenium(time_calc
+      .getJulianEphemerisCentury(time_calc.getJulianEphemerisDay(dateTime2)));
   final nutation2 = getNutation(
-      time_calc.getJulianCentury(time_calc.gregorianToJulianDay(dateTime2)));
+      time_calc.getJulianCentury(time_calc.getJulianDay(dateTime2)));
 
   final geocentricLongitude2 = getGeocentricLongitude(jme2);
   final abCorrection2 = getAberrationCorrection(getEarthRadiusVector(jme2));
@@ -37,11 +53,10 @@ dynamic getCalculations(double latitude, double longitude, DateTime dateTime) {
   final apparentSunLongitude2 =
       getApparentSunLongitude(geocentricLongitude2, nutation2, abCorrection2);
 
-  final jme0 = time_calc.getJulianEphemerisMillenium(
-      time_calc.getJulianEphemerisCentury(
-          time_calc.gregorianToJulianEphemerisDay(dateTime0)));
+  final jme0 = time_calc.getJulianEphemerisMillenium(time_calc
+      .getJulianEphemerisCentury(time_calc.getJulianEphemerisDay(dateTime0)));
   final nutation0 = getNutation(
-      time_calc.getJulianCentury(time_calc.gregorianToJulianDay(dateTime0)));
+      time_calc.getJulianCentury(time_calc.getJulianDay(dateTime0)));
 
   final geocentricLongitude0 = getGeocentricLongitude(jme0);
   final abCorrection0 = getAberrationCorrection(getEarthRadiusVector(jme0));
@@ -70,7 +85,7 @@ dynamic getCalculations(double latitude, double longitude, DateTime dateTime) {
       apparentSunLongitude2, trueObliquityOfEcliptic2, geocentricLatitude2);
 
   final res = getTimeCalcOfSun(
-    time_calc.gregorianToJulianDay(dateTime1),
+    time_calc.getJulianDay(dateTime1),
     jme1,
     nutation1,
     geocentricSunRightAscensionYesterday,
@@ -84,15 +99,56 @@ dynamic getCalculations(double latitude, double longitude, DateTime dateTime) {
     dateTime.year,
     dateTime.month,
   );
-  for (var d in res) {
-    var hr = (d + 5.5).truncate();
-    var min = ((d + 5.5) - hr) * 60;
-    var sec = ((min - min.truncate()) * 60).truncate();
-    print('$hr:${min.truncate()}:$sec');
+  return SunCalc(
+    sunTransitTime: dateTime1
+        .add(Duration(seconds: (Duration.secondsPerDay * res[0]).floor())),
+    sunRiseTime: dateTime1
+        .add(Duration(seconds: (Duration.secondsPerDay * res[1]).floor())),
+    sunSetTime: dateTime1
+        .add(Duration(seconds: (Duration.secondsPerDay * res[2]).floor())),
+  );
+}
+
+///returns time of sunrise for given latitude and longitude.
+///By default returns time in UTC, to get local time set isLocal to true
+DateTime getSunRiseTime(double latitude, double longitude, DateTime dateTime,
+    {isLocal = false}) {
+  if (isLocal) {
+    return getCalculations(latitude, longitude, dateTime).sunRiseTime.toLocal();
   }
+  return getCalculations(latitude, longitude, dateTime).sunRiseTime;
+}
+
+///returns time of sunset for given latitude and longitude.
+///By default returns time in UTC, to get local time set isLocal to true
+DateTime getSunSetTime(double latitude, double longitude, DateTime dateTime,
+    {isLocal = false}) {
+  if (isLocal) {
+    return getCalculations(latitude, longitude, dateTime).sunSetTime.toLocal();
+  }
+  return getCalculations(latitude, longitude, dateTime).sunSetTime;
+}
+
+///returns time of noon or when sun is at highest point for given latitude and longitude.
+///By default returns time in UTC, to get local time set isLocal to true
+DateTime getSunTransitTime(double latitude, double longitude, DateTime dateTime,
+    {isLocal = false}) {
+  if (isLocal) {
+    return getCalculations(latitude, longitude, dateTime)
+        .sunTransitTime
+        .toLocal();
+  }
+  return getCalculations(latitude, longitude, dateTime).sunTransitTime;
 }
 
 //TODO: remove after proper implementation
-void main(List<String> args) {
-  getCalculations(28.408913, 77.317787, DateTime.utc(2020, 12, 26));
+void main() {
+  final latitude = 28.6139;
+  final longitude = 77.2090;
+  final dateTime = DateTime.utc(2020, 12, 30);
+
+  final sunRiseTime =
+      getSunRiseTime(latitude, longitude, dateTime, isLocal: true);
+
+  print('Sunrise Time: $sunRiseTime');
 }

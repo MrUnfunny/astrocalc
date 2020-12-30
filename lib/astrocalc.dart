@@ -1,4 +1,4 @@
 library astrocalc;
 
-export 'src/timeCalc.dart';
-export 'src/solarCalc.dart';
+export 'src/time_calc.dart';
+export 'src/solar_calc.dart';

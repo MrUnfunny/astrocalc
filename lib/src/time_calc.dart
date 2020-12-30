@@ -104,18 +104,20 @@ double getDeltaT(int year, int month) {
   }
 }
 
-// Epoch for Julian day is January 1, 4713 BC in proleptic Julian calendar
+// Epoch for Julian day is January 1, 4713 BC in proleptic Julian calendar and
 // November 24, 4714 BC in the proleptic Gregorian calendar
 // Since 1 BC is year 0, we'll use year -4713
 final julianEpoch = DateTime.utc(-4713, 11, 24, 12, 0, 0);
 
-double gregorianToJulianDay(DateTime dateTime) {
+//calculated using Universal Time
+double getJulianDay(DateTime dateTime) {
   return ((dateTime.difference(julianEpoch).inSeconds /
       Duration.secondsPerDay));
 }
 
-double gregorianToJulianEphemerisDay(DateTime dateTime) {
-  return (gregorianToJulianDay(dateTime) +
+///calculated using Terrestrial Time
+double getJulianEphemerisDay(DateTime dateTime) {
+  return (getJulianDay(dateTime) +
       getDeltaT(dateTime.year, dateTime.month) / Duration.secondsPerDay);
 }
 
@@ -131,7 +133,7 @@ double getJulianEphemerisMillenium(double julianEphemerisCentury) {
   return julianEphemerisCentury / 10.0;
 }
 
-DateTime julianToGregorianDay(double julianDay) {
+DateTime getGregorianDay(double julianDay) {
   return julianEpoch.add(Duration(
       milliseconds: (julianDay * Duration.secondsPerDay * 1000).floor()));
 }

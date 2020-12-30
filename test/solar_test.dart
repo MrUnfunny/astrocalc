@@ -24,8 +24,7 @@ void main() {
   group('Julian Day Tests', () {
     test('Get Julian Day from Gregorian Day', () {
       for (var dateTime in julianDayTestData.keys) {
-        expect(gregorianToJulianDay(dateTime),
-            equals(julianDayTestData[dateTime]));
+        expect(getJulianDay(dateTime), equals(julianDayTestData[dateTime]));
       }
     });
 
@@ -33,23 +32,22 @@ void main() {
       final _reversedMap =
           julianDayTestData.map((key, value) => MapEntry(value, key));
       for (var julianDay in julianDayTestData.values) {
-        expect(
-            julianToGregorianDay(julianDay), equals(_reversedMap[julianDay]));
+        expect(getGregorianDay(julianDay), equals(_reversedMap[julianDay]));
       }
     });
   });
 
-  final jd = gregorianToJulianDay(dateTime);
+  final jd = getJulianDay(dateTime);
 
   final jme = getJulianEphemerisMillenium(
-      getJulianEphemerisCentury(gregorianToJulianDay(dateTime)));
+      getJulianEphemerisCentury(getJulianDay(dateTime)));
 
-  final jce = getJulianEphemerisCentury(gregorianToJulianDay(dateTime));
+  final jce = getJulianEphemerisCentury(getJulianDay(dateTime));
 
   final nutation = getNutation(jce);
   group('Heliocentric Calculations', () {
     final jme = getJulianEphemerisMillenium(
-        getJulianEphemerisCentury(gregorianToJulianDay(dateTime)));
+        getJulianEphemerisCentury(getJulianDay(dateTime)));
     test('Get Heliocentric Latitude', () {
       expect(getHeliocentricLatitude(jme), closeTo(-0.0001011219, 0.001));
     });

@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:meta/meta.dart';
 
-import 'constants.dart';
-import 'timeCalc.dart' as time_calc;
+import 'constants.dart' as constant;
+import 'time_calc.dart' as time_calc;
 
 double degToRad(double degree) => degree * pi / 180;
 double radToDeg(double radian) => radian * 180 / pi;
@@ -37,18 +37,30 @@ double getCoefficients(num jme, List<List<List<num>>> coefficientTable) {
   return result;
 }
 
+double thirdOrderPolynomial(List<double> coeff, double jce) {
+  return coeff[0] +
+      coeff[1] * jce +
+      coeff[2] * pow(jce, 2) +
+      pow(jce, 3) / coeff[3];
+}
+
+//-----------------------------------------------------------------------------
+
 double getHeliocentricLongitude(num jme) =>
-    (((getCoefficients(jme, HeliocentriclongitudeCoefficients) / 1e8) * 180) /
+    (((getCoefficients(jme, constant.HeliocentriclongitudeCoefficients) / 1e8) *
+            180) /
         pi) %
     360;
 
 double getHeliocentricLatitude(num jme) =>
-    ((getCoefficients(jme, HeliocentricLatitudeCoefficients) / 1e8) * 180) / pi;
+    ((getCoefficients(jme, constant.HeliocentricLatitudeCoefficients) / 1e8) *
+        180) /
+    pi;
 
 /// Returns Radius Vector in Astronomical Units(AU). This is basically
 /// the distance between Earth and Sun
 double getEarthRadiusVector(num jme) =>
-    getCoefficients(jme, EarthRadiusVectorCoefficients) / 1e8;
+    getCoefficients(jme, constant.EarthRadiusVectorCoefficients) / 1e8;
 
 double getGeocentricLongitude(num jme) {
   return (getHeliocentricLongitude(jme) + 180) % 360;
@@ -58,38 +70,32 @@ double getGeocentricLatitude(num jme) {
   return -1 * getHeliocentricLatitude(jme);
 }
 
-//-----------------------------------------------------------------------------
-
-double thirdOrderPolynomial(List<double> coeff, double jce) {
-  return coeff[0] +
-      coeff[1] * jce +
-      coeff[2] * pow(jce, 2) +
-      pow(jce, 3) / coeff[3];
-}
-
 double getMeanElongationOfMoon(double jce) {
   return thirdOrderPolynomial(
-      NutationCoefficients['getMeanElongationOfMoon'], jce);
+      constant.NutationCoefficients['getMeanElongationOfMoon'], jce);
 }
 
 double getMeanAnomalyOfSun(double jce) {
-  return thirdOrderPolynomial(NutationCoefficients['getMeanAnomalyOfSun'], jce);
+  return thirdOrderPolynomial(
+      constant.NutationCoefficients['getMeanAnomalyOfSun'], jce);
 }
 
 double getMeanAnomalyOfMoon(double jce) {
   return thirdOrderPolynomial(
-      NutationCoefficients['getMeanAnomalyOfMoon'], jce);
+      constant.NutationCoefficients['getMeanAnomalyOfMoon'], jce);
 }
 
 double getArgumentLatitude(double jce) {
-  return thirdOrderPolynomial(NutationCoefficients['getArgumentLatitude'], jce);
+  return thirdOrderPolynomial(
+      constant.NutationCoefficients['getArgumentLatitude'], jce);
 }
 
 double getAscendingAltitude(double jce) {
   return thirdOrderPolynomial(
-      NutationCoefficients['getAscendingAltitude'], jce);
+      constant.NutationCoefficients['getAscendingAltitude'], jce);
 }
 
+/// irregularity in axis of rotation of earth due to precession
 Nutation getNutation(double jce) {
   var nutationlongitude = 0.0;
   var nutationOblique = 0.0;
@@ -101,17 +107,17 @@ Nutation getNutation(double jce) {
     getAscendingAltitude(jce)
   ];
 
-  for (var i = 0; i < NutationCoefficientsList.length; i++) {
+  for (var i = 0; i < constant.NutationCoefficientsList.length; i++) {
     var xySum = 0.0;
     for (var j = 0; j < xList.length; j++) {
-      xySum += xList[j] * AberrationSinTerms[i][j];
+      xySum += xList[j] * constant.AberrationSinTerms[i][j];
     }
-    nutationlongitude += ((NutationCoefficientsList[i][0] +
-            (NutationCoefficientsList[i][1] * jce)) *
+    nutationlongitude += ((constant.NutationCoefficientsList[i][0] +
+            (constant.NutationCoefficientsList[i][1] * jce)) *
         sin((xySum * pi) / 180));
 
-    nutationOblique += ((NutationCoefficientsList[i][2] +
-            (NutationCoefficientsList[i][3] * jce)) *
+    nutationOblique += ((constant.NutationCoefficientsList[i][2] +
+            (constant.NutationCoefficientsList[i][3] * jce)) *
         cos((xySum * pi) / 180));
   }
   return Nutation(
@@ -119,6 +125,7 @@ Nutation getNutation(double jce) {
       obliquity: nutationOblique / 36000000.0);
 }
 
+///angle of earth's equator with ecliptic plane
 double getTrueObliquityOfEcliptic(double jme, Nutation nutation) {
   var u = jme / 10;
   var meanObliquity = 84381.448 -
@@ -135,6 +142,7 @@ double getTrueObliquityOfEcliptic(double jme, Nutation nutation) {
   return meanObliquity / 3600.0 + nutation.obliquity;
 }
 
+///correction in position of sun due to earth's motion
 double getAberrationCorrection(double earthSunDistance) {
   return -20.4898 / (3600 * earthSunDistance);
 }
@@ -176,8 +184,8 @@ double getGeocentricSunDeclination(double apparentSunLongitude,
       sinRad(trueObliquityOfEcliptic);
   return radToDeg(asin(a + b));
 }
-//-------------------------------------------------------------------------\\
 
+// Right Ascension of sun with respect to the observer
 double getLocalHourAngle(double apparentSiderealTime, double longitude,
     double geocentricRightAscension) {
   return (apparentSiderealTime + longitude - geocentricRightAscension) % 360;
@@ -414,7 +422,7 @@ List<double> getTimeCalcOfSun(
   final S = approxSunsetTime +
       (sunalt2 - h0) / (360 * cosRad(delta2) * cosRad(latitude) * sinRad(lh2));
 
-  return [(T * 24) % 24, (R * 24) % 24, (S * 24) % 24];
+  return [T, R, S];
 }
 
 double limit_degrees180pm(double degrees) {
