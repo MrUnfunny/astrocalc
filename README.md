@@ -30,6 +30,12 @@ By default all functions return DateTime object for UTC. To get it in Local form
       getSunTransitTime(latitude, longitude, dateTime, isLocal: true);
       
 ```
+**AZIMUTH ANGLE OF SUN**
+```dart
+ final azimuthAngle =
+      getSunAzimuthAngle(latitude, longitude, elevation); //elevation is w.r.t. Sea level
+      
+```
 
 ## Example
 ```dart
