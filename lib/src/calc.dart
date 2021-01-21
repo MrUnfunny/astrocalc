@@ -74,8 +74,8 @@ SunCalc getCalculations(double latitude, double longitude, DateTime dateTime) {
     geocentricSunDeclinationYesterday,
     geocentricSunDeclinationToday,
     geocentricSunDeclinationTomorrow,
-    longitude, //77.317787,
-    latitude, //28.408913,
+    longitude,
+    latitude,
     dateTime.year,
     dateTime.month,
   );

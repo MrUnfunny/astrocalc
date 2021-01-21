@@ -62,12 +62,12 @@ double getDeltaT(int year, int month) {
   }
 }
 
-// Epoch for Julian day is January 1, 4713 BC in proleptic Julian calendar and
-// November 24, 4714 BC in the proleptic Gregorian calendar
-// Since 1 BC is year 0, we'll use year -4713
+/// Epoch for Julian day is January 1, 4713 BC in proleptic Julian calendar and
+/// November 24, 4714 BC in the proleptic Gregorian calendar
+/// Since 1 BC is year 0, we'll use year -4713
 final julianEpoch = DateTime.utc(-4713, 11, 24, 12, 0, 0);
 
-//calculated using Universal Time
+///calculated using Universal Time
 double getJulianDay(DateTime dateTime) {
   return ((dateTime.difference(julianEpoch).inSeconds / Duration.secondsPerDay));
 }

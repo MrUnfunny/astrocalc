@@ -4,26 +4,7 @@ import 'package:meta/meta.dart';
 
 import 'constants.dart' as constant;
 import 'time_calc.dart' as time_calc;
-
-double degToRad(double degree) => degree * pi / 180;
-double radToDeg(double radian) => radian * 180 / pi;
-double cosRad(double degree) => cos(degToRad(degree));
-double sinRad(double degree) => sin(degToRad(degree));
-double tanRad(double degree) => tan(degToRad(degree));
-
-double limit_degrees180pm(double degrees) {
-  double limited;
-
-  degrees /= 360.0;
-  limited = 360.0 * (degrees - (degrees.floor()));
-  if (limited < -180.0) {
-    limited += 360.0;
-  } else if (limited > 180.0) {
-    limited -= 360.0;
-  }
-
-  return limited;
-}
+import 'utils.dart' as utils;
 
 class Nutation {
   double longitude;
@@ -148,17 +129,17 @@ double getApparentSiderealTime(double julianDay, double jme, Nutation nutation) 
 }
 
 double getGeocentricSunRightAscension(double apparentSunLongitude, double trueObliquityOfEcliptic, double geocentricLatitude) {
-  var a = sinRad(apparentSunLongitude) * cosRad(trueObliquityOfEcliptic);
-  var b = tanRad(geocentricLatitude) * sinRad(trueObliquityOfEcliptic);
-  var c = cosRad(apparentSunLongitude);
+  var a = utils.sinRad(apparentSunLongitude) * utils.cosRad(trueObliquityOfEcliptic);
+  var b = utils.tanRad(geocentricLatitude) * utils.sinRad(trueObliquityOfEcliptic);
+  var c = utils.cosRad(apparentSunLongitude);
   var alpha = atan2((a - b), c);
-  return radToDeg(alpha) % 360;
+  return utils.radToDeg(alpha) % 360;
 }
 
 double getGeocentricSunDeclination(double apparentSunLongitude, double trueObliquityOfEcliptic, double geocentricLatitude) {
-  var a = sinRad(geocentricLatitude) * cosRad(trueObliquityOfEcliptic);
-  var b = sinRad(apparentSunLongitude) * cosRad(geocentricLatitude) * sinRad(trueObliquityOfEcliptic);
-  return radToDeg(asin(a + b));
+  var a = utils.sinRad(geocentricLatitude) * utils.cosRad(trueObliquityOfEcliptic);
+  var b = utils.sinRad(apparentSunLongitude) * utils.cosRad(geocentricLatitude) * utils.sinRad(trueObliquityOfEcliptic);
+  return utils.radToDeg(asin(a + b));
 }
 
 /// Right Ascension of sun with respect to the observer
@@ -171,21 +152,21 @@ double getEquatorialHorizontalParallaxOfSun(double earthRadiusVector) {
 }
 
 double getFlattenedLatitude(double latitude) {
-  return radToDeg(atan(0.99664719 * tanRad(latitude)));
+  return utils.radToDeg(atan(0.99664719 * utils.tanRad(latitude)));
 }
 
 double getProjectedRadialDistance(double elevation, double latitude) {
-  return cosRad(getFlattenedLatitude(latitude)) + (elevation * cosRad(latitude)) / 6378140.0;
+  return utils.cosRad(getFlattenedLatitude(latitude)) + (elevation * utils.cosRad(latitude)) / 6378140.0;
 }
 
 double getProjectedAxialDistance(double elevation, double latitude) {
-  return 0.99664719 * sinRad(getFlattenedLatitude(latitude)) + elevation * sinRad(latitude) / 6378140.0;
+  return 0.99664719 * utils.sinRad(getFlattenedLatitude(latitude)) + elevation * utils.sinRad(latitude) / 6378140.0;
 }
 
 double getParallaxInSunRightAscension(double projectedRadialDistance, double equatorialHorizontalParallax, double localHourAngle, double geocentricSunDeclination) {
-  var a = -1 * sinRad(equatorialHorizontalParallax) * sinRad(localHourAngle);
-  var b = cosRad(geocentricSunDeclination) - projectedRadialDistance * sinRad(equatorialHorizontalParallax) * cosRad(localHourAngle);
-  return radToDeg(atan2(a, b));
+  var a = -1 * utils.sinRad(equatorialHorizontalParallax) * utils.sinRad(localHourAngle);
+  var b = utils.cosRad(geocentricSunDeclination) - projectedRadialDistance * utils.sinRad(equatorialHorizontalParallax) * utils.cosRad(localHourAngle);
+  return utils.radToDeg(atan2(a, b));
 }
 
 double getTopocentricSunRightAscension(
@@ -199,9 +180,9 @@ double getTopocentricSunRightAscension(
 
 double getTopocentricSunDeclination(double projectedAxialDistance, double equatorialHorizontalParallax, double localHourAngle, double projectedRadialDistance, double geocentricSunDeclination) {
   var parallaxSunRightAscension = getParallaxInSunRightAscension(projectedRadialDistance, equatorialHorizontalParallax, localHourAngle, geocentricSunDeclination);
-  var a = (sinRad(geocentricSunDeclination) - projectedAxialDistance * sinRad(equatorialHorizontalParallax)) * cosRad(parallaxSunRightAscension);
-  var b = cosRad(geocentricSunDeclination) - (projectedAxialDistance * sinRad(equatorialHorizontalParallax) * cosRad(localHourAngle));
-  return radToDeg(atan2(a, b));
+  var a = (utils.sinRad(geocentricSunDeclination) - projectedAxialDistance * utils.sinRad(equatorialHorizontalParallax)) * utils.cosRad(parallaxSunRightAscension);
+  var b = utils.cosRad(geocentricSunDeclination) - (projectedAxialDistance * utils.sinRad(equatorialHorizontalParallax) * utils.cosRad(localHourAngle));
+  return utils.radToDeg(atan2(a, b));
 }
 
 double getTopocentricLocalHourAngle(double localHourAngle, double parallaxInSunRightAscension) {
@@ -209,12 +190,12 @@ double getTopocentricLocalHourAngle(double localHourAngle, double parallaxInSunR
 }
 
 double getTopocentricElevationAngle(double latitude, double topocentricSunDeclination, double topocentricLocalHourAngle) {
-  return radToDeg(asin((sinRad(latitude) * sinRad(topocentricSunDeclination)) + cosRad(latitude) * cosRad(topocentricLocalHourAngle) * cosRad(topocentricSunDeclination)));
+  return utils.radToDeg(asin((utils.sinRad(latitude) * utils.sinRad(topocentricSunDeclination)) + utils.cosRad(latitude) * utils.cosRad(topocentricLocalHourAngle) * utils.cosRad(topocentricSunDeclination)));
 }
 
 double getAtmosphericRefractionCorrection(double pressure, double temperatureInCelsius, double topocentricElevationAngle) {
   var a = pressure * 283 * 1.02;
-  var b = 1010.0 * (temperatureInCelsius + 273) * 60.0 * tanRad(topocentricElevationAngle + (10.3 / (topocentricElevationAngle + 5.11)));
+  var b = 1010.0 * (temperatureInCelsius + 273) * 60.0 * utils.tanRad(topocentricElevationAngle + (10.3 / (topocentricElevationAngle + 5.11)));
 
   if (topocentricElevationAngle >= -1.0 * (2.830 + 0.5667)) return a / b;
   return 0;
@@ -227,13 +208,13 @@ double getTopocentricZenithAngle(double latitude, double topocentricSunDeclinati
 }
 
 double getTopocentricAzimuthAngle(double topocentricLocalHourAngle, double latitude, double topocentricSunDeclination) {
-  var a = sinRad(topocentricLocalHourAngle);
-  var b = cosRad(topocentricLocalHourAngle) * sinRad(latitude) - tanRad(topocentricSunDeclination) * cosRad(latitude);
-  return (180 + radToDeg(atan2(a, b))) % 360;
+  var a = utils.sinRad(topocentricLocalHourAngle);
+  var b = utils.cosRad(topocentricLocalHourAngle) * utils.sinRad(latitude) - utils.tanRad(topocentricSunDeclination) * utils.cosRad(latitude);
+  return (180 + utils.radToDeg(atan2(a, b))) % 360;
 }
 
 double getIncidenceAngle(double topocentricZenithAngle, double slope, double slopeOrientation, double topocentricAzimuthAngle) {
-  return radToDeg(acos(cosRad(topocentricZenithAngle) * cosRad(slope) + sinRad(slope) * sinRad(topocentricZenithAngle) * cos(degToRad(topocentricAzimuthAngle) - pi - degToRad(slopeOrientation))));
+  return utils.radToDeg(acos(utils.cosRad(topocentricZenithAngle) * utils.cosRad(slope) + utils.sinRad(slope) * utils.sinRad(topocentricZenithAngle) * cos(utils.degToRad(topocentricAzimuthAngle) - pi - utils.degToRad(slopeOrientation))));
 }
 
 //------------------------------------------------------------------------\\
@@ -245,7 +226,7 @@ double getMeanLongitudeOfSun(double jme) {
 }
 
 double getEquationOfTime(double meanLongitudeOfSun, double geocentricRightAscension, double nutationInLongitude, double trueObliquityOfEcliptic) {
-  final eot = (meanLongitudeOfSun - 0.0057183 - geocentricRightAscension + (nutationInLongitude * cosRad(trueObliquityOfEcliptic))) * 4;
+  final eot = (meanLongitudeOfSun - 0.0057183 - geocentricRightAscension + (nutationInLongitude * utils.cosRad(trueObliquityOfEcliptic))) * 4;
   if (eot > 20) return eot - 1440;
   if (eot < -20) return eot + 1440;
   return eot;
@@ -274,7 +255,7 @@ List<double> getTimeCalcOfSun(
   final approxSunTransitTime = (geocentricSunRightAscensionToday - longitude - apparentSiderealTime) / 360;
 
 //TODO: Arccosine is not in the range from -1 to 1, it means that the sun is always above or below the horizon for that day
-  final localHourAngle = radToDeg(acos((sinRad(h0) - sinRad(latitude) * sinRad(geocentricSunDeclinationToday)) / cosRad(latitude) * cosRad(geocentricSunDeclinationToday)));
+  final localHourAngle = utils.radToDeg(acos((utils.sinRad(h0) - utils.sinRad(latitude) * utils.sinRad(geocentricSunDeclinationToday)) / utils.cosRad(latitude) * utils.cosRad(geocentricSunDeclinationToday)));
 
   final approxSunriseTime = (approxSunTransitTime - (localHourAngle / 360));
   final approxSunsetTime = approxSunTransitTime + (localHourAngle / 360);
@@ -301,17 +282,17 @@ List<double> getTimeCalcOfSun(
   final alpha2 = geocentricSunRightAscensionToday + n2 * (a + b + c * n2) / 2;
   final delta2 = geocentricSunDeclinationToday + n2 * (ad + bd + cd * n2) / 2;
 
-  final lh0 = limit_degrees180pm(sTGsunTransit + longitude - alpha0);
-  final lh1 = limit_degrees180pm(sTGsunrise + longitude - alpha1);
-  final lh2 = limit_degrees180pm(sTGsunset + longitude - alpha2);
+  final lh0 = utils.limit_degrees180pm(sTGsunTransit + longitude - alpha0);
+  final lh1 = utils.limit_degrees180pm(sTGsunrise + longitude - alpha1);
+  final lh2 = utils.limit_degrees180pm(sTGsunset + longitude - alpha2);
 
-  final sunalt0 = radToDeg(asin(sinRad(latitude) * sinRad(delta0) + cosRad(latitude) * cosRad(delta0) * cosRad(lh0)));
-  final sunalt1 = radToDeg(asin(sinRad(latitude) * sinRad(delta1) + cosRad(latitude) * cosRad(delta1) * cosRad(lh1)));
-  final sunalt2 = radToDeg(asin(sinRad(latitude) * sinRad(delta2) + cosRad(latitude) * cosRad(delta2) * cosRad(lh2)));
+  final sunalt0 = utils.radToDeg(asin(utils.sinRad(latitude) * utils.sinRad(delta0) + utils.cosRad(latitude) * utils.cosRad(delta0) * utils.cosRad(lh0)));
+  final sunalt1 = utils.radToDeg(asin(utils.sinRad(latitude) * utils.sinRad(delta1) + utils.cosRad(latitude) * utils.cosRad(delta1) * utils.cosRad(lh1)));
+  final sunalt2 = utils.radToDeg(asin(utils.sinRad(latitude) * utils.sinRad(delta2) + utils.cosRad(latitude) * utils.cosRad(delta2) * utils.cosRad(lh2)));
 
   final T = approxSunTransitTime - lh0 / 360;
-  final R = approxSunriseTime + (sunalt1 - h0) / (360 * cosRad(delta1) * cosRad(latitude) * sinRad(lh1));
-  final S = approxSunsetTime + (sunalt2 - h0) / (360 * cosRad(delta2) * cosRad(latitude) * sinRad(lh2));
+  final R = approxSunriseTime + (sunalt1 - h0) / (360 * utils.cosRad(delta1) * utils.cosRad(latitude) * utils.sinRad(lh1));
+  final S = approxSunsetTime + (sunalt2 - h0) / (360 * utils.cosRad(delta2) * utils.cosRad(latitude) * utils.sinRad(lh2));
 
   return [T, R, S];
 }
