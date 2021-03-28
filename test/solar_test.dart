@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:astrocalc/astrocalc.dart';
-import 'package:astrocalc/src/solar_calc.dart';
+import 'package:astro_calculations/astro_calculations.dart';
+import 'package:astro_calculations/src/solar_calc.dart';
 import 'data/solar_test_data.dart';
 
 void main() {

@@ -1,14 +1,15 @@
-# Astrocalc
+# astro_calculations
 
-Astrocalc is a Dart package for astronomical calculations. Astrocalc is inspired by [Pysolar](https://github.com/pingswept/pysolar) and based on [this pdf](https://www.nrel.gov/docs/fy08osti/34302.pdf) by <strong>Ibrahim Reda</strong> and <strong>Afshin Andreas</strong>.
+astro_calculations is a Dart package for astronomical calculations. astro_calculations is inspired by [Pysolar](https://github.com/pingswept/pysolar) and based on [this pdf](https://www.nrel.gov/docs/fy08osti/34302.pdf) by <strong>Ibrahim Reda</strong> and <strong>Afshin Andreas</strong>.
 
-Astrocalc is currently a work in progress. It will soon support many more calculations.
+astro_calculations is currently a work in progress. It will soon support many more calculations.
 
 ## Usage
 
 **SUNRISE TIME**
 <br>
-By default all functions return DateTime object for UTC. To get it in Local format, pass isLocal as true. 
+By default all functions return DateTime object for UTC. To get it in Local format, pass isLocal as true.
+
 ```dart
   final latitude = 28.6139;
   final longitude = 77.2090;
@@ -16,28 +17,35 @@ By default all functions return DateTime object for UTC. To get it in Local form
 
   final sunRiseTime =
       getSunRiseTime(latitude, longitude, dateTime, isLocal: true);
-      
+
 ```
+
 **SUNSET TIME**
+
 ```dart
  final sunSetTime =
       getSunSetTime(latitude, longitude, dateTime, isLocal: true);
-      
+
 ```
+
 **SUN TRANSIT TIME**
+
 ```dart
  final sunTransitTime =
       getSunTransitTime(latitude, longitude, dateTime, isLocal: true);
-      
+
 ```
+
 **AZIMUTH ANGLE OF SUN**
+
 ```dart
  final azimuthAngle =
       getSunAzimuthAngle(latitude, longitude, elevation); //elevation is w.r.t. Sea level
-      
+
 ```
 
 ## Example
+
 ```dart
 void main() {
   final latitude = 28.6139;
@@ -55,7 +63,7 @@ void main() {
   print('Sunset Time: $sunSetTime');
   print('Sun Transit Time: $sunTransitTime');
 }
-````
+```
 
 **OUTPUT**
 

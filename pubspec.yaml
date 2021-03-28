@@ -1,7 +1,7 @@
-name: astrocalc
+name: astro_calculations
 description: A starting point for Dart libraries or applications.
 version: 0.0.0
-homepage: https://github.com/MrUnfunny/astrocalc
+homepage: https://github.com/MrUnfunny/astro_calculations
 environment:
   sdk: ">=2.10.0 <3.0.0"
 

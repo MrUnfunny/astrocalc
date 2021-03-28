@@ -1,4 +1,4 @@
-import 'package:astrocalc/src/solar_calc.dart';
+import 'package:astro_calculations/src/solar_calc.dart';
 
 /// Data retrieved  from "Solar Position Algorithm for
 /// Solar Radiation Applications" by "Ibrahim Reda and Afshin Andreas" as
