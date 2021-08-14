@@ -1,59 +1,35 @@
-name: Dart CI
+name: cicd
 
 on:
-  # Run on PRs and pushes to the master branch.
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-
-env:
-  PUB_ENVIRONMENT: bot.github
+    branches:
+      - master
 
 jobs:
-
-  # runs dart test
-  test:
+  release:
+    name: Release
     runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
-      matrix:
-        sdk: [stable]
     steps:
-      - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1.0
-        with:
-          sdk: stable
-      - name: Install dependencies
-        run: dart pub get
-      - name: Run VM tests
-        run: dart test --platform vm
-
-  # release
-
-  run-semantic-release:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run semantic-release
+      - uses: cedx/setup-dart@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - run: npm install -g "@semantic-release/changelog"
+      - run: npm install -g "@semantic-release/git"
+      - run: npm install -g "semantic-release-dart"
+
+      - name: Bump version
         run: |
-          export PATH=$PATH:$(yarn global bin)
-          yarn global add semantic-release@17.4.3
-          semantic-release
+          export NODE_PATH="$(npm root -g)"
+          npx semantic-release@17
+          ls -lah
+          git status
+          cat pubspec.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # semantic-release:
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: Run semantic-release
-  #       if: github.repository == 'casbin/casbin' && github.event_name == 'push'
-  #       run: make release
-  
+      - name: Publish to pub
+        run: dart pub publish --dry-run
