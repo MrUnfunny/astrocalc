@@ -1,3 +1,3 @@
-## 0.0.0
+## 0.0.2
 
-- Initial version, created by Stagehand
+- New version, no major changes
